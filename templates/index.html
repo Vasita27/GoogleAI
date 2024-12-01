@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Summarizer</title>
+  <title>Audio Summarizer</title>
   <style>
     body {
       font-family: sans-serif;
@@ -24,7 +24,7 @@
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border: 5px solid transparent; /* Make the border transparent so that the gradient will show */
-  border-image: linear-gradient(to right, #dba0a0, #d6a9c7, #c56f7e, #8996e6, #dfd4eb) 1; /* Apply gradient border */ /* Add white border to the card */
+      border-image: linear-gradient(to right, #dba0a0, #d6a9c7, #c56f7e, #8996e6, #dfd4eb) 1; /* Apply gradient border */
       text-align: center;
     }
   
@@ -116,6 +116,12 @@
     #summary-container p {
       color: white; /* Set paragraph color to white */
     }
+
+    #key-points-summary p {
+      margin-bottom: 10px; /* Add spacing between each key point */
+      color: white; /* Keep the text color white */
+      font-size: 1.1rem; /* Adjust the font size as needed */
+    }
   </style>
   
 </head>
@@ -148,8 +154,6 @@
     const waitCursor = document.getElementById('wait-cursor');
     const tlDrSummary = document.getElementById('tl;dr-summary');
     const keyPointsSummary = document.getElementById('key-points-summary');
-    const teaserSummary = document.getElementById('teaser-summary');
-    const headlineSummary = document.getElementById('headline-summary');
 
     uploadButton.addEventListener('click', async () => {
       const file = audioFileInput.files[0];
@@ -172,7 +176,6 @@
         });
 
         const data = await response.json();
-        console.log(data)
         if (data.error) {
           throw new Error(data.error);
         }
@@ -183,20 +186,26 @@
         // Create summarizer instances for each type
         const tlDrSummarizer = await ai.summarizer.create({ type: 'tl;dr', format: 'plain-text', length: 'short' });
         const keyPointsSummarizer = await ai.summarizer.create({ type: 'key-points', format: 'plain-text' });
-        
 
         // Summarize using each summarizer
         const tlDrSummaryText = await tlDrSummarizer.summarize(transcribedText);
         const keyPointsSummaryText = await keyPointsSummarizer.summarize(transcribedText);
-        
 
         // Display the summaries
         tlDrSummary.querySelector('p').textContent = tlDrSummaryText;
-        keyPointsSummary.querySelector('p').textContent = keyPointsSummaryText;
-       
+
+        // Split the key points into individual lines and display them
+        const keyPoints = keyPointsSummaryText.split('\n'); // Split the text into an array of key points
+        keyPointsSummary.innerHTML = '<h3>Key Points:</h3>'; // Reset the content with the heading
+        keyPoints.forEach(point => {
+          const p = document.createElement('p');
+          p.textContent = point;
+          keyPointsSummary.appendChild(p);
+        });
 
       } catch (error) {
         console.error('Error summarizing text:', error);
+        alert("Unknown error occured");
       } finally {
         // Hide the wait cursor
         waitCursor.style.display = 'none';

@@ -20,11 +20,10 @@ def transcribe():
         with sr.AudioFile(audio_file) as source:
             audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data)
-        print(text)
         return jsonify({'text': text})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000,debug=True)
